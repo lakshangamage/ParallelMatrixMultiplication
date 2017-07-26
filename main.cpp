@@ -5,11 +5,13 @@
 #include <time.h> 	
 #include <omp.h>
 #define CHUNKSIZE 100	
+#define GAP 200	
 using namespace std;
 
 int nthreads, tid;
 
-int N;
+int N = 200;
+int max_N;
 double *matrixA;
 double *matrixB;
 
@@ -22,50 +24,52 @@ int main ()
 	string user_input;
 	cout << "Please enter N: ";
 	getline(cin, user_input);
-	stringstream(user_input) >> N;
+	stringstream(user_input) >> max_N;
 
-	//int array_size = N;
-	matrixA = new double[N*N];
-	matrixB  = new double[N*N];
+	while(N <= max_N) {
 
-  /* initialize random seed: */
-	srand (time(NULL));
+		//int array_size = N;
+		matrixA = new double[N*N];
+		matrixB  = new double[N*N];
 
-	for(int i = 0; i < N; i++) {
-		for (int j = 0; j < N; j++)
-		{
-			matrixA[i*N+j] = rand();
-			matrixB[i*N+j] = rand();  		
-		}  	
-	}
-	// printMatrix(matrixA);
-	// printMatrix(matrixB);
+	  /* initialize random seed: */
+		srand (time(NULL));
 
-	cout << "==============Sequential===========\n"<< endl;
-	cout << "timing start..."<< endl;
-	clock_t start_time = clock();
+		for(int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++)
+			{
+				matrixA[i*N+j] = rand();
+				matrixB[i*N+j] = rand();  		
+			}  	
+		}
+		// printMatrix(matrixA);
+		// printMatrix(matrixB);
 
-	double *resultMatrix = multiplyMatrices(matrixA, matrixB);
+		//cout << "\n==============Sequential===========\n"<< endl;
+		clock_t start_time = clock();
 
-	float time_spent = (double)(clock() - start_time) * 1000.0 /  CLOCKS_PER_SEC;
-	cout << "timing end..."<< endl;
-	//printMatrix(resultMatrix);
-	delete []resultMatrix;
-	cout << "Total time spent for multiplication = " << time_spent << endl;
+		double *resultMatrix = multiplyMatrices(matrixA, matrixB);
 
-	cout << "\n==============Parallel===========\n"<< endl;
-	cout << "timing start..."<< endl;
-	start_time = clock();
+		float time_spent = (double)(clock() - start_time) * 1000.0 /  CLOCKS_PER_SEC;
 
-	double *parallelResultMatrix = multiplyMatricesParallel(matrixA, matrixB);
+		cout << "Matrix size = " << N << endl;
+		cout << "Total time spent for sequential multiplication = " << time_spent << endl;
+		delete []resultMatrix;
 
-	time_spent = (double)(clock() - start_time) * 1000.0 /  CLOCKS_PER_SEC;
-	cout << "timing end..."<< endl;
-	//printMatrix(resultMatrix);
-	delete []parallelResultMatrix;
-	cout << "Total time spent for multiplication = " << time_spent << endl;
-	delete []matrixA; 
-	delete []matrixB; 
+		//cout << "\n==============Parallel===========\n"<< endl;
+		start_time = clock();
+
+		double *parallelResultMatrix = multiplyMatricesParallel(matrixA, matrixB);
+
+		time_spent = (double)(clock() - start_time) * 1000.0 /  CLOCKS_PER_SEC;
+
+		cout << "Total time spent for parallel multiplication = " << time_spent << endl << endl;
+
+		delete []parallelResultMatrix;
+		delete []matrixA; 
+		delete []matrixB;
+		N += GAP;
+	} 
 	 
 	return 0;
 }
