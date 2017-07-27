@@ -7,7 +7,7 @@
 #include <math.h> 
 #define CHUNKSIZE 100	
 #define MAX_SAMPLE_SIZE 50	
-#define MIN_SAMPLE_SIZE 5	
+#define MIN_SAMPLE_SIZE 10	
 #define GAP 200	
 #define CONFIDENCE 1.96	
 #define ACCURACY 0.05	
@@ -22,7 +22,7 @@ void printMatrix(double *matrix);
 double* multiplyMatrices(double *matrix_1, double *matrix_2);
 double* multiplyMatricesParallel(double *matrix_1, double *matrix_2);
 double calcStd(double* totArrray, double mean, int noOfSamples);
-double calcSampleCount(double std);
+double calcSampleCount(double std, double mean);
 
 int main ()
 {
@@ -93,11 +93,11 @@ int main ()
 			{
 				serial_mean = serial_tot/currentSample;
 				double serialStd = calcStd(serialTotArray, serial_mean, currentSample);
-				int serialSampleCount = calcSampleCount(serialStd);
+				int serialSampleCount = calcSampleCount(serialStd, serial_mean);
 
 				parallel_mean = parallel_tot / currentSample;
 				double parallelStd = calcStd(parallelTotArray, parallel_mean, currentSample);
-				int parallelSampleCount = calcSampleCount(parallelStd);
+				int parallelSampleCount = calcSampleCount(parallelStd, parallel_mean);
 
 				samplesNeeded = serialSampleCount;
 				if (serialSampleCount < parallelSampleCount)
@@ -187,7 +187,10 @@ double calcStd(double* totArrray, double mean, int noOfSamples){
 	return sqrt(total/noOfSamples);
 }
 
-double calcSampleCount(double std){
-	return (int)round(pow(CONFIDENCE,2.0) * std * (1-std) / pow(ACCURACY,2.0)); 
+double calcSampleCount(double std, double mean){
+	//return (int)round(pow(CONFIDENCE,2.0) * std * (1-std) / pow(ACCURACY,2.0)); 
+	int samplecount = (int)round(pow((CONFIDENCE * std / ACCURACY)/mean,2.0));
+	
+	return samplecount; 
 }
 
