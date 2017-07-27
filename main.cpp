@@ -15,6 +15,10 @@ int max_N;
 double *matrixA;
 double *matrixB;
 
+clock_t start_time;
+clock_t end_time;
+double time_spent;
+
 void printMatrix(double *matrix);
 double* multiplyMatrices(double *matrix_1, double *matrix_2);
 double* multiplyMatricesParallel(double *matrix_1, double *matrix_2);
@@ -46,11 +50,12 @@ int main ()
 		// printMatrix(matrixB);
 
 		//cout << "\n==============Sequential===========\n"<< endl;
-		clock_t start_time = clock();
+		start_time = clock();
 
 		double *resultMatrix = multiplyMatrices(matrixA, matrixB);
+		end_time = clock();
 
-		float time_spent = (double)(clock() - start_time) * 1000.0 /  CLOCKS_PER_SEC;
+		time_spent = (double)(end_time - start_time) * 1000.0 /  CLOCKS_PER_SEC;
 
 		cout << "Matrix size = " << N << endl;
 		cout << "Total time spent for sequential multiplication = " << time_spent << endl;
@@ -60,10 +65,13 @@ int main ()
 		start_time = clock();
 
 		double *parallelResultMatrix = multiplyMatricesParallel(matrixA, matrixB);
-
-		time_spent = (double)(clock() - start_time) * 1000.0 /  CLOCKS_PER_SEC;
+		//cout << "clock end" << endl;
+		end_time = clock();
+		time_spent = (double)(end_time - start_time) * 1000.0 /  CLOCKS_PER_SEC;
 
 		cout << "Total time spent for parallel multiplication = " << time_spent << endl << endl;
+
+		//printMatrix(parallelResultMatrix);
 
 		delete []parallelResultMatrix;
 		delete []matrixA; 
@@ -109,11 +117,12 @@ double* multiplyMatricesParallel(double *matrix_1, double *matrix_2){
 	int i,j,k = 0;
 	int size = N;
 	double total = 0;
-	#pragma omp parallel shared(matrix_1,matrix_2,outputMatrix,chunk) private(i,j,k,total,size)
+	#pragma omp parallel shared(matrix_1,matrix_2,outputMatrix,chunk,size) private(i,j,k,total)
 	{
-		#pragma omp for schedule(dynamic,chunk) nowait
+		#pragma omp for schedule(dynamic,chunk)
 		for (i = 0; i < size; i++)
 		{
+			//printf("%d\n",i);
 			for (j = 0; j < size; j++)
 			{
 				total = 0;
@@ -124,7 +133,6 @@ double* multiplyMatricesParallel(double *matrix_1, double *matrix_2){
 				outputMatrix[i*size+j] = total;
 			}		
 		}
-
 	}   /* end of parallel region */ 
 	return outputMatrix;
 } 
