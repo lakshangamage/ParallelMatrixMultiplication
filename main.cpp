@@ -7,6 +7,7 @@
 #include <math.h> 
 #define CHUNKSIZE 100	
 #define MAX_SAMPLE_SIZE 50	
+#define MIN_SAMPLE_SIZE 5	
 #define GAP 200	
 #define CONFIDENCE 1.96	
 #define ACCURACY 0.05	
@@ -88,7 +89,7 @@ int main ()
 			parallelTotArray[currentSample-1] = parallel_time_spent;
 			
 
-			if (currentSample > 1)
+			if (currentSample >= MIN_SAMPLE_SIZE)
 			{
 				serial_mean = serial_tot/currentSample;
 				double serialStd = calcStd(serialTotArray, serial_mean, currentSample);
