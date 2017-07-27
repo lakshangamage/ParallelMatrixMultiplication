@@ -15,8 +15,8 @@ int max_N;
 double *matrixA;
 double *matrixB;
 
-clock_t start_time;
-clock_t end_time;
+double start_time;
+double end_time;
 double time_spent;
 
 void printMatrix(double *matrix);
@@ -50,26 +50,26 @@ int main ()
 		// printMatrix(matrixB);
 
 		//cout << "\n==============Sequential===========\n"<< endl;
-		start_time = clock();
+		start_time = omp_get_wtime();
 
 		double *resultMatrix = multiplyMatrices(matrixA, matrixB);
-		end_time = clock();
+		end_time = omp_get_wtime();
 
-		time_spent = (double)(end_time - start_time) * 1000.0 /  CLOCKS_PER_SEC;
+		time_spent = (end_time - start_time) * 1000.0;
 
 		cout << "Matrix size = " << N << endl;
-		cout << "Total time spent for sequential multiplication = " << time_spent << endl;
+		cout << "Total time spent for sequential multiplication = " << time_spent <<" ms" << endl;
 		delete []resultMatrix;
 
 		//cout << "\n==============Parallel===========\n"<< endl;
-		start_time = clock();
+		start_time = omp_get_wtime();
 
 		double *parallelResultMatrix = multiplyMatricesParallel(matrixA, matrixB);
 		//cout << "clock end" << endl;
-		end_time = clock();
-		time_spent = (double)(end_time - start_time) * 1000.0 /  CLOCKS_PER_SEC;
+		end_time = omp_get_wtime();
+		time_spent = (end_time - start_time) * 1000.0;
 
-		cout << "Total time spent for parallel multiplication = " << time_spent << endl << endl;
+		cout << "Total time spent for parallel multiplication = " << time_spent <<" ms"<< endl << endl;
 
 		//printMatrix(parallelResultMatrix);
 
