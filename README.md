@@ -1,6 +1,6 @@
 # ParallelMatrixMultiplication
 
-##main.cpp
+## main.cpp
 
 *This file contains the code for sequential matrix multiplication and parallel-for matrix multiplication.
 *Once this is run, it will run for all the configurations of n (from 200 to 2000 with a step of 200).
@@ -8,12 +8,12 @@
  accuracy of 5% is achieved for both sequential and parallel methods. 
 *Minimum number of samples will be 10.
 
-###Compilation Command: 
+### Compilation Command: 
   g++ -fopenmp main.cpp -o main
-###Run Command: 
+### Run Command: 
   ./main
 
-###Sample Output:
+### Sample Output:
 	Matrix size              = 200
 	No. of Samples           = 21
 	Average time sequential  = 0.0588636 s
@@ -36,7 +36,7 @@
 	---------------------------------
 	---------------------------------
 
- ##optimizedmain.cpp
+ ## optimizedmain.cpp
 
 *This file contains the code for optimized parallel matrix multiplication.
 *Once this is run, it will run for all the configurations of n (from 200 to 2000 with a step of 200).
@@ -44,12 +44,12 @@
  accuracy of 5% is achieved. 
 *Minimum number of samples will be 10.
 
-###Compilation Command: 
+### Compilation Command: 
   g++ -O3 -fopenmp -march=native -std=gnu++11 optimizedmain.cpp -o optimizedmain
-###Run Command: 
+### Run Command: 
   ./optimizedmain
 
-###Sample Output:
+### Sample Output:
 
 	Matrix size              = 200
 	No. of Samples           = 10
