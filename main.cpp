@@ -36,7 +36,10 @@ int main ()
 		double *parallelTotArray = new double[MAX_SAMPLE_SIZE]; //keeps the total time of each sample -parallel
 		double parallel_tot = 0; //current total of samples - parallel
 		double parallel_mean = 0; //current mean of samples - parallel 
-		while( currentSample <= MAX_SAMPLE_SIZE && samplesNeeded > currentSample){
+		while( currentSample <= MAX_SAMPLE_SIZE && samplesNeeded > currentSample){ //while maximum number of samples OR required number of samples not run		
+			/*
+				Initialize and allocate memory for matrices A and B
+			 */
 			matrixA = new double*[N];
 			matrixB = new double*[N];
 
@@ -85,7 +88,7 @@ int main ()
 			delete []matrixB;
 
 			/*
-				add up the results to relevant totals and store results in relevant arrays
+				add the results to relevant totals and store results in relevant arrays
 			*/
 			serial_tot += serial_time_spent;
 			serialTotArray[currentSample-1] = serial_time_spent;
@@ -99,7 +102,7 @@ int main ()
 				and accuracy is calculated only after 
 				minimum number of samples exceeded.
 				mean and standard deviations are calculated
-				and number of needed samples is calculated 
+				and then the number of needed samples is calculated 
 				for each of the methods(serial/parallel).
 			*/
 
@@ -131,7 +134,6 @@ int main ()
 		/*
 			Print the calculated information.
 		*/
-
 		cout << "Matrix size              = " << N << endl;
 		cout << "No. of Samples           = " << currentSample - 1 << endl;
 		cout << "Average time sequential  = " << serial_mean <<" s" << endl;		
@@ -140,13 +142,17 @@ int main ()
 
 		delete []serialTotArray;
 		delete []parallelTotArray;
-		
+
 		N += GAP;
 	} 	 
 	return 0;
 }
 
-
+/**
+ * function to print a matrix 
+ * 
+ * @param double** matrix [matrix to be printed]
+ */
 void printMatrix(double **matrix) {
 	for(int i = 0; i < N; i++) {
 	  	for (int j = 0; j < N; j++)
@@ -158,15 +164,30 @@ void printMatrix(double **matrix) {
   	cout << "\n";
 }
 
+/**
+ * function for multiplying 2 matrices sequentially	
+ * 						
+ * @param double** matrix1 [first matrix]
+ * @param double** matrix2 [second matrix]
+ * @return double** outputMatrix [result matrix]
+ */				
 double** multiplyMatrices(double **matrix_1, double **matrix_2){
+	/*
+		Initialize and allocate memory for output matriz
+	 */
 	double **outputMatrix = new double*[N];	
 	for (int x = 0; x < N; x++)
 	{
 		outputMatrix[x] = new double[N];
 	}
-	for (int i = 0; i < N; i++)
+
+	/*
+		Calculate the multipliction of matrices
+		in the most basic way
+	 */
+	for (int i = 0; i < N; i++) //for each row
 	{
-		for (int j = 0; j < N; j++)
+		for (int j = 0; j < N; j++) // for each column
 				{
 					outputMatrix[i][j] = 0;
 
@@ -179,7 +200,17 @@ double** multiplyMatrices(double **matrix_1, double **matrix_2){
 	return outputMatrix;
 } 
 
+/**
+ * function for multiplying 2 matrices parallely.
+ * 
+ * @param double** matrix1 [first matrix]
+ * @param double** matrix2 [second matrix]
+ * @return double** outputMatrix [result matrix]
+ */
 double** multiplyMatricesParallel(double **matrix_1, double **matrix_2){
+	/*
+		Initialize and allocate memory for output matrix
+	 */
 	double **outputMatrix = new double*[N];	
 	for (int x = 0; x < N; x++)
 	{
@@ -189,12 +220,22 @@ double** multiplyMatricesParallel(double **matrix_1, double **matrix_2){
 	int i,j,k = 0;
 	int size = N;
 
-	#pragma omp parallel shared(matrix_1,matrix_2,outputMatrix,chunk,size) private(i,j,k)
+	/*
+		Use OpenMp for parallelizing the multiplication.
+		i,j,k variables are kept private for each threads 
+		matrices and static sizes are kept shared.
+	 */
+	#pragma omp parallel shared(matrix_1,matrix_2,outputMatrix,chunk,size) private(i,j,k) //start of parallel region
 	{
-		#pragma omp for schedule(dynamic,chunk)
-		for (i = 0; i < size; i++)
+		#pragma omp for schedule(dynamic,chunk) // OpenMp parallel-for definition
+
+		/*
+			Calculate the multipliction of matrices
+			in the most basic way
+		 */
+		for (i = 0; i < size; i++) //for each row
 		{
-			for (j = 0; j < size; j++)
+			for (j = 0; j < size; j++) // for each column
 			{		
 				outputMatrix[i][j] = 0;		
 				for (k = 0; k < size; k++)
@@ -203,10 +244,18 @@ double** multiplyMatricesParallel(double **matrix_1, double **matrix_2){
 				}				
 			}		
 		}
-	}   /* end of parallel region */ 
+	}   // end of parallel region 
 	return outputMatrix;
 } 
 
+/**
+ * function for calculating standard deviation of the sample
+ * 
+ * @param double* totArrray [Array containing results of each sample]
+ * @param double mean [Mean of the sample]
+ * @param int noOfSamples [Number of samples upto now]
+ * @return double [Standard deviation of the sample]
+ */
 double calcStd(double* totArrray, double mean, int noOfSamples){
 	double total = 0;
 	for (int i = 0; i < noOfSamples; i++)
@@ -216,6 +265,14 @@ double calcStd(double* totArrray, double mean, int noOfSamples){
 	return sqrt(total/noOfSamples);
 }
 
+/**
+ * function for calculating number of samples 
+ * needed to achieve expected accuracy and confidence
+ * 
+ * @param double std [starndard deviation of the sample]
+ * @param double mean [mean of the sample]
+ * @return double [number of samples needed to achieve expected confidence and accuracy]
+ */
 double calcSampleCount(double std, double mean){
 	int samplecount = (int)round(pow((CONFIDENCE * std )/ (ACCURACY*mean), 2.0));
 	return samplecount; 
